@@ -9,7 +9,7 @@
   },
   "scripts": {
     "start": "node index.js",
-    "test": "node test/smoke.js"
+    "test": "node --env-file=.env test/smoke.js"
   },
   "keywords": ["mcp", "omnifabric", "matrixone", "mysql"],
   "author": "",

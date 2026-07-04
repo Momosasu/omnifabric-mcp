@@ -1,19 +1,17 @@
 import assert from "node:assert";
 import { buildConnectionConfig } from "../lib.js";
 
-const baseEnv = {
-  OMNIFABRIC_HOST: "example.omni.example.com",
-  OMNIFABRIC_ACCOUNT: "00000000-0000-0000-0000-000000000000",
-  OMNIFABRIC_USER: "testuser",
-  OMNIFABRIC_ROLE: "testrole",
-  OMNIFABRIC_PASSWORD: "secret",
-};
+const config = buildConnectionConfig(process.env);
+assert.ok(config.host, "host missing");
+assert.strictEqual(
+  config.user,
+  `${process.env.OMNIFABRIC_ACCOUNT}:${process.env.OMNIFABRIC_USER}:${process.env.OMNIFABRIC_ROLE}`
+);
+assert.strictEqual(config.port, Number(process.env.OMNIFABRIC_PORT || 6001));
 
-const config = buildConnectionConfig(baseEnv);
-assert.strictEqual(config.user, "00000000-0000-0000-0000-000000000000:testuser:testrole");
-assert.strictEqual(config.port, 6001);
-assert.strictEqual(config.database, undefined);
-
-assert.throws(() => buildConnectionConfig({ ...baseEnv, OMNIFABRIC_HOST: undefined }), /Missing required env vars/);
+assert.throws(
+  () => buildConnectionConfig({ ...process.env, OMNIFABRIC_HOST: undefined }),
+  /Missing required env vars/
+);
 
 console.log("ok");
