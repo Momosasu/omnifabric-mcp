@@ -26,7 +26,7 @@ There is no app-level statement filtering (that's what broke the alternative abo
 
 Give this prompt to Claude Code (or any AI coding agent with shell access):
 
-> Install the OmniFabric MCP server. Clone https://github.com/Momosasu/omnifabric-mcp.git, run `npm install`, copy `.env.example` to `.env` and ask me for my OmniFabric credentials (host, account UUID, username, role, password) to fill it in, add it to my MCP config at `~/.claude/.mcp.json` pointing at the absolute path of `index.js` with those credentials in its `env` block, and verify the connection by calling `run_query` with `SHOW DATABASES`.
+> Install the OmniFabric MCP server. Clone https://github.com/Momosasu/omnifabric-mcp.git, run `npm install`, copy `.env.example` to `.env` and ask me for my OmniFabric credentials (host, account UUID, username, role, password) to fill it in, add it to my MCP config at `~/.claude/.mcp.json` with `args` set to `["--env-file=<absolute path to .env>", "<absolute path to index.js>"]`, and verify the connection by calling `run_query` with `SHOW DATABASES`.
 
 ## Quick Start
 
@@ -67,22 +67,14 @@ npm test
 
 ### 3. Add to Claude Code
 
-Add to your MCP config (`~/.claude/.mcp.json` or project `.mcp.json`):
+Add to your MCP config (`~/.claude/.mcp.json` or project `.mcp.json`), pointing at the `.env` you just filled in — no need to re-enter credentials here:
 
 ```json
 {
   "mcpServers": {
     "omnifabric": {
       "command": "node",
-      "args": ["/path/to/omnifabric-mcp/index.js"],
-      "env": {
-        "OMNIFABRIC_HOST": "...",
-        "OMNIFABRIC_PORT": "6001",
-        "OMNIFABRIC_ACCOUNT": "...",
-        "OMNIFABRIC_USER": "...",
-        "OMNIFABRIC_ROLE": "...",
-        "OMNIFABRIC_PASSWORD": "..."
-      }
+      "args": ["--env-file=/path/to/omnifabric-mcp/.env", "/path/to/omnifabric-mcp/index.js"]
     }
   }
 }
