@@ -1,0 +1,21 @@
+{
+  "name": "omnifabric-mcp",
+  "version": "1.0.0",
+  "description": "MCP server exposing SQL access to a CloudSigma OmniFabric (MatrixOne-compatible) database",
+  "main": "index.js",
+  "type": "module",
+  "bin": {
+    "omnifabric-mcp": "./index.js"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "test": "node test/smoke.js"
+  },
+  "keywords": ["mcp", "omnifabric", "matrixone", "mysql"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "mysql2": "^3.22.5"
+  }
+}
