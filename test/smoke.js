@@ -2,15 +2,15 @@ import assert from "node:assert";
 import { buildConnectionConfig } from "../lib.js";
 
 const baseEnv = {
-  OMNIFABRIC_HOST: "database.omni.jhb.cloudsigma.com",
-  OMNIFABRIC_ACCOUNT: "019f27ec-6db6-794e-a62d-57e17f765c5b",
-  OMNIFABRIC_USER: "admin",
-  OMNIFABRIC_ROLE: "accountadmin",
+  OMNIFABRIC_HOST: "example.omni.example.com",
+  OMNIFABRIC_ACCOUNT: "00000000-0000-0000-0000-000000000000",
+  OMNIFABRIC_USER: "testuser",
+  OMNIFABRIC_ROLE: "testrole",
   OMNIFABRIC_PASSWORD: "secret",
 };
 
 const config = buildConnectionConfig(baseEnv);
-assert.strictEqual(config.user, "019f27ec-6db6-794e-a62d-57e17f765c5b:admin:accountadmin");
+assert.strictEqual(config.user, "00000000-0000-0000-0000-000000000000:testuser:testrole");
 assert.strictEqual(config.port, 6001);
 assert.strictEqual(config.database, undefined);
 
