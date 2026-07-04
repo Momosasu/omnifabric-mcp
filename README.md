@@ -2,6 +2,16 @@
 
 MCP server giving an LLM SQL access to a CloudSigma OmniFabric database (MatrixOne-compatible, MySQL wire protocol).
 
+## What It Does
+
+Exposes one MCP tool, `run_query`, that runs any SQL statement against your OmniFabric/MatrixOne instance over the standard MySQL wire protocol (via `mysql2`) and returns the rows as JSON. No schema-specific tooling, no query rewriting — whatever SQL you (or the LLM) send is what runs.
+
+## Prerequisites
+
+- Node.js 20.6+ (uses the native `--env-file` flag for local testing)
+- A running OmniFabric instance and its connection details: host, port (default 6001), account UUID, username, role, password
+- An MCP-compatible client (Claude Code, Claude Desktop, etc.)
+
 ## Why a custom server instead of an existing one
 
 - **Memoria** (`matrixorigin/Memoria`) is a semantic-memory product built on MatrixOne (store/retrieve/branch/merge memories), not a raw SQL passthrough tool — doesn't fit.
@@ -16,39 +26,73 @@ There is no app-level statement filtering (that's what broke the alternative abo
 
 Give this prompt to Claude Code (or any AI coding agent with shell access):
 
-> Clone https://github.com/Momosasu/omnifabric-mcp, run `npm install`, copy `.env.example` to `.env`, ask me for my OmniFabric credentials (host, account UUID, username, role, password) and fill them in, run `npm test` to confirm the config is valid, then add it to my MCP client config pointing at the absolute path of `index.js`.
+> Install the OmniFabric MCP server. Clone https://github.com/Momosasu/omnifabric-mcp.git, run `npm install`, copy `.env.example` to `.env` and ask me for my OmniFabric credentials (host, account UUID, username, role, password) to fill it in, add it to my MCP config at `~/.claude/.mcp.json` pointing at the absolute path of `index.js` with those credentials in its `env` block, and verify the connection by calling `run_query` with `SHOW DATABASES`.
 
-## Setup
+## Quick Start
 
-1. Copy `.env.example` to `.env` and fill in the credentials from your OmniFabric provisioning (CloudSigma console or `mo_ctl` deploy output):
-   ```
-   OMNIFABRIC_HOST, OMNIFABRIC_PORT (default 6001), OMNIFABRIC_ACCOUNT, OMNIFABRIC_USER, OMNIFABRIC_ROLE, OMNIFABRIC_PASSWORD
-   ```
-2. **Verify with the plain `mysql` CLI first**, before touching MCP:
-   ```
-   mysql -h <OMNIFABRIC_HOST> -P 6001 -u <ACCOUNT>:<USER>:<ROLE> -p
-   ```
-3. Install deps: `npm install`
-4. Run the smoke test (validates your `.env` assembles into a well-formed config — tenant-username format, port, required vars — no live DB connection made): `npm test`
-5. Point your MCP client at it, e.g. in `claude_desktop_config.json` / `.mcp.json`:
-   ```json
-   {
-     "mcpServers": {
-       "omnifabric": {
-         "command": "node",
-         "args": ["/absolute/path/to/index.js"],
-         "env": {
-           "OMNIFABRIC_HOST": "...",
-           "OMNIFABRIC_PORT": "6001",
-           "OMNIFABRIC_ACCOUNT": "...",
-           "OMNIFABRIC_USER": "...",
-           "OMNIFABRIC_ROLE": "...",
-           "OMNIFABRIC_PASSWORD": "..."
-         }
-       }
-     }
-   }
-   ```
+### 1. Install
+
+```bash
+git clone https://github.com/Momosasu/omnifabric-mcp.git
+cd omnifabric-mcp
+npm install
+```
+
+### 2. Configure credentials
+
+```bash
+cp .env.example .env
+```
+
+Fill in `.env` with the credentials from your OmniFabric provisioning (CloudSigma console or `mo_ctl` deploy output):
+
+```
+OMNIFABRIC_HOST=your-instance.omni.example.cloudsigma.com
+OMNIFABRIC_PORT=6001
+OMNIFABRIC_ACCOUNT=your-account-uuid
+OMNIFABRIC_USER=your-username
+OMNIFABRIC_ROLE=your-role
+OMNIFABRIC_PASSWORD=your-password
+```
+
+Optional: sanity-check the login works before touching MCP at all:
+```bash
+mysql -h <OMNIFABRIC_HOST> -P 6001 -u <ACCOUNT>:<USER>:<ROLE> -p
+```
+
+Then validate your `.env` assembles into a well-formed config (no live DB connection made):
+```bash
+npm test
+```
+
+### 3. Add to Claude Code
+
+Add to your MCP config (`~/.claude/.mcp.json` or project `.mcp.json`):
+
+```json
+{
+  "mcpServers": {
+    "omnifabric": {
+      "command": "node",
+      "args": ["/path/to/omnifabric-mcp/index.js"],
+      "env": {
+        "OMNIFABRIC_HOST": "...",
+        "OMNIFABRIC_PORT": "6001",
+        "OMNIFABRIC_ACCOUNT": "...",
+        "OMNIFABRIC_USER": "...",
+        "OMNIFABRIC_ROLE": "...",
+        "OMNIFABRIC_PASSWORD": "..."
+      }
+    }
+  }
+}
+```
+
+Replace `/path/to/omnifabric-mcp` with your actual path.
+
+### 4. Verify
+
+Ask Claude: *"Use run_query to run SHOW DATABASES"*
 
 ## Tools
 
