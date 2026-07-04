@@ -21,7 +21,9 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
         "Safety is enforced by the DB user's role/grants, not by this tool — use a read-only account unless writes are explicitly needed.",
       inputSchema: {
         type: "object",
-        properties: { sql: { type: "string", description: "SQL statement to execute" } },
+        properties: {
+          sql: { type: "string", description: "SQL statement to execute", maxLength: 10000 },
+        },
         required: ["sql"],
       },
     },
@@ -34,7 +36,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   }
   const { sql } = request.params.arguments ?? {};
   try {
-    const [rows] = await pool.query(sql);
+    const [rows] = await pool.query({ sql, timeout: 30000 });
     return { content: [{ type: "text", text: JSON.stringify(rows) }] };
   } catch (error) {
     return { content: [{ type: "text", text: `Error: ${error.message}` }], isError: true };
